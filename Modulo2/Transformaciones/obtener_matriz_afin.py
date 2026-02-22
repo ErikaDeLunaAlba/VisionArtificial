@@ -25,17 +25,17 @@ def obtener_puntos(imagen_vis):
     return params["puntos"]
 
 
-ruta = "Modulo_02/img/lena.jpeg"
-#imagen = cv2.imread(ruta, cv2.IMREAD_GRAYSCALE)
-imagen = cv2.imread(ruta)
+ruta = "part2/cameraman.png"
+imagen = cv2.imread(ruta, cv2.IMREAD_GRAYSCALE)
+#imagen = cv2.imread(ruta)
 h,w = imagen.shape[0:2]
 
 centro_y, centro_x = int(np.floor(h/2)), int(np.floor(w/2))
 T1 = TransformacionesEuclideanas.traslado(-centro_x, -centro_y)
 T2 = TransformacionesEuclideanas.traslado(centro_x, centro_y)
 
-RN1 = TransformacionesEuclideanas.rotacion(-np.pi/2,1)
-TN1 = TransformacionesEuclideanas.traslado(2, 2)
+RN1 = TransformacionesEuclideanas.rotacion(np.deg2rad(-22),1)
+TN1 = TransformacionesEuclideanas.traslado(-60, -35)
 CN1 = TransformacionesAfines.cizallamiento_horizontal(1.025)
 
 T = T2 @ TN1 @ CN1 @ RN1 @ T1
