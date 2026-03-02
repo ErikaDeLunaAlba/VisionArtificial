@@ -14,7 +14,7 @@ class Ventana(tk.Tk):
         self.geometry("1100x500")
         self.protocol("WM_DELETE_WINDOW", self.cierre)
 
-        self.ruta_imagen = "Modulo_03/img/cameraman.png"
+        self.ruta_imagen = "img/cameraman.png"
 
         self.imagen = cv2.imread(self.ruta_imagen)
         self.h, self.w = self.imagen.shape[0:2]
@@ -53,7 +53,7 @@ class Ventana(tk.Tk):
 
         self.__canvas_hist = FigureCanvasTkAgg(self.fig, master=self)
         self.__canvas_hist.get_tk_widget().place(x=550, y=40, width=500, height=400)
-        self.mostrar_histograma(self.obtener_v(self.imagen_procesada))
+        self.mostrar_histograma(self.obtener_y(self.imagen_procesada))
 
         self.__canvas_check = tk.Checkbutton(self, text="Ecualizar Histograma", variable=self.__check_status, command=self.actualizar_imagen, onvalue=True)
         self.__canvas_check.place(x=100, y=250+200)
@@ -71,28 +71,39 @@ class Ventana(tk.Tk):
         contraste = self.__escala_contraste.get()
         gamma = self.__escala_gamma.get()
         self.mostrar_imagen_procesada(brillo, contraste, gamma)
-        self.mostrar_histograma(self.obtener_v(self.imagen_procesada))
+        self.mostrar_histograma(self.obtener_y(self.imagen_procesada))
 
-    def obtener_v(self, imagen):
-        return cv2.cvtColor(imagen, cv2.COLOR_BGR2HSV)[:,:,2]
+    def obtener_y(self, imagen):
+        """Obtiene el canal Y de YUV"""
+        return cv2.cvtColor(imagen, cv2.COLOR_BGR2YUV)[:,:,0]
 
     def mostrar_histograma(self, datos):
         self.ax.clear()
-        self.ax.set_title('Histograma de Imagen Procesada')
+        self.ax.set_title('Histograma de Imagen Procesada (Canal Y)')
         self.ax.set_xlabel('Valor')
         self.ax.set_ylabel('Frecuencia')
         self.ax.hist(datos.flatten(), bins=256, alpha=0.7, range=(0,255), color='blue', edgecolor='black')
         self.__canvas_hist.draw_idle()
 
     def procesar_imagen(self, contraste, brillo, gamma):
-        imagen_color_HSV = cv2.cvtColor(self.imagen, cv2.COLOR_BGR2HSV)
-        imagen_v = imagen_color_HSV[:,:,2]
-        imagen_color_HSV_procesada = Procesador.contraste_brillo_centrado(imagen_v, contraste, brillo)
-        imagen_color_HSV_procesada = Procesador.correccion_gamma(imagen_color_HSV_procesada, gamma)
+        # Convertir BGR a YUV
+        imagen_color_YUV = cv2.cvtColor(self.imagen, cv2.COLOR_BGR2YUV)
+        
+        # Obtener el canal Y (luminancia)
+        imagen_y = imagen_color_YUV[:,:,0]
+        
+        # Procesar el canal Y
+        imagen_y_procesada = Procesador.contraste_brillo_centrado(imagen_y, contraste, brillo)
+        imagen_y_procesada = Procesador.correccion_gamma(imagen_y_procesada, gamma)
+        
         if self.__check_status.get():
-            imagen_color_HSV_procesada = Procesador.ecualizar_hist(imagen_color_HSV_procesada)
-        imagen_color_HSV[:,:,2] = imagen_color_HSV_procesada
-        self.imagen_procesada =  cv2.cvtColor(imagen_color_HSV, cv2.COLOR_HSV2BGR)
+            imagen_y_procesada = Procesador.ecualizar_hist(imagen_y_procesada)
+        
+        # Actualizar el canal Y procesado
+        imagen_color_YUV[:,:,0] = imagen_y_procesada
+        
+        # Convertir de vuelta a BGR
+        self.imagen_procesada = cv2.cvtColor(imagen_color_YUV, cv2.COLOR_YUV2BGR)
 
 class Procesador:
     @staticmethod
