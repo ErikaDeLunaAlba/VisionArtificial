@@ -14,7 +14,7 @@ class Ventana(tk.Tk):
         self.geometry("1100x500")
         self.protocol("WM_DELETE_WINDOW", self.cierre)
 
-        self.ruta_imagen = "img/img1.jpeg"
+        self.ruta_imagen = "img/img16.jpeg"
 
         # Cargar imagen original
         self.imagen = cv2.imread(self.ruta_imagen)
