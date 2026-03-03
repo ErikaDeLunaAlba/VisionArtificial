@@ -14,15 +14,26 @@ class Ventana(tk.Tk):
         self.geometry("1100x500")
         self.protocol("WM_DELETE_WINDOW", self.cierre)
 
-        self.ruta_imagen = "img/cameraman.png"
+        self.ruta_imagen = "img/img1.jpeg"
 
+        # Cargar imagen original
         self.imagen = cv2.imread(self.ruta_imagen)
-        self.h, self.w = self.imagen.shape[0:2]
         self.imagen_pl = Image.open(self.ruta_imagen)
-        self.imagen_tk = ImageTk.PhotoImage(self.imagen_pl)
+        
+        # Dimensiones de la ventana para imágenes
+        self.image_display_size = (300, 200)  # Tamaño fijo para mostrar las imágenes
+        
+        # Redimensionar imagen original para visualización
+        self.imagen_redimensionada = self.imagen_pl.copy()
+        self.imagen_redimensionada.thumbnail(self.image_display_size, Image.Resampling.LANCZOS)
+        self.imagen_tk = ImageTk.PhotoImage(self.imagen_redimensionada)
+        
+        # Imagen procesada inicial
         self.imagen_procesada = cv2.imread(self.ruta_imagen)
         self.imagen_procesada_pl = Image.open(self.ruta_imagen)
-        self.imagen_procesada_tk = ImageTk.PhotoImage(self.imagen_procesada_pl)
+        self.imagen_procesada_redimensionada = self.imagen_procesada_pl.copy()
+        self.imagen_procesada_redimensionada.thumbnail(self.image_display_size, Image.Resampling.LANCZOS)
+        self.imagen_procesada_tk = ImageTk.PhotoImage(self.imagen_procesada_redimensionada)
 
         self.fig, self.ax = plt.subplots(figsize=(1, 2))
         self.__check_status = tk.BooleanVar()
@@ -34,11 +45,14 @@ class Ventana(tk.Tk):
         self.destroy()
 
     def mostrar_ventana(self):
-        self.__canvas_imagen = tk.Canvas(self, width=self.w, height=self.h, background="black")
-        self.__canvas_imagen_proc = tk.Canvas(self, width=self.w, height=self.h, background="black")
+        # Canvases con tamaño fijo para las imágenes
+        canvas_width, canvas_height = self.image_display_size
+        
+        self.__canvas_imagen = tk.Canvas(self, width=canvas_width, height=canvas_height, background="black")
+        self.__canvas_imagen_proc = tk.Canvas(self, width=canvas_width, height=canvas_height, background="black")
 
         if self.imagen is not None:
-            self.__canvas_imagen.create_image(self.w/2, self.h/2, image=self.imagen_tk)
+            self.__canvas_imagen.create_image(canvas_width/2, canvas_height/2, image=self.imagen_tk)
             self.__canvas_imagen.place(x=30, y=40)
 
         self.mostrar_imagen_procesada(0, 1, 1)
@@ -62,8 +76,14 @@ class Ventana(tk.Tk):
         self.procesar_imagen(contraste, brillo, gamma)
         im = cv2.cvtColor(self.imagen_procesada, cv2.COLOR_BGR2RGB)
         self.imagen_procesada_pl = Image.fromarray(im)
-        self.imagen_procesada_tk = ImageTk.PhotoImage(self.imagen_procesada_pl)
-        self.__canvas_imagen_proc.create_image(self.w/2, self.h/2, image=self.imagen_procesada_tk)
+        
+        # Redimensionar la imagen procesada para visualización
+        self.imagen_procesada_redimensionada = self.imagen_procesada_pl.copy()
+        self.imagen_procesada_redimensionada.thumbnail(self.image_display_size, Image.Resampling.LANCZOS)
+        self.imagen_procesada_tk = ImageTk.PhotoImage(self.imagen_procesada_redimensionada)
+        
+        canvas_width, canvas_height = self.image_display_size
+        self.__canvas_imagen_proc.create_image(canvas_width/2, canvas_height/2, image=self.imagen_procesada_tk)
         self.__canvas_imagen_proc.place(x=250 + 30, y=40)
         
     def actualizar_imagen(self, val=None):
