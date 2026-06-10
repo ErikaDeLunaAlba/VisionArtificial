@@ -1,0 +1,15 @@
+# Entornos virtuales (cualquier carpeta que contenga site-packages)
+venv/
+env/
+.venv/
+*/Lib/site-packages/
+Modulo8/Mod8/Lib/site-packages/
+
+# Archivos grandes de modelos/binarios (por si acaso)
+*.dll
+*.pyd
+*.so
+*.dylib
+*.h5
+*.pt
+*.pth
